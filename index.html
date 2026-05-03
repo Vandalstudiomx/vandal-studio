@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vandal Studio — Creative Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Krub:ital,wght@0,200;0,300;0,400;1,200&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --red: #E20A0A;
+  --red-dim: #b00808;
+  --charcoal: #1A1A1A;
+  --white: #F2F2F2;
+  --blue: #AACDE2;
+  --bg: #0d0d0d;
+  --surface: #111111;
+  --border: rgba(242,242,242,0.08);
+  --muted: rgba(242,242,242,0.35);
+  --font: 'Krub', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: var(--font);
+  font-weight: 300;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* Cursor */
+.cursor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+  transition: transform 0.1s ease;
+}
+.cursor-dot {
+  width: 6px; height: 6px;
+  background: var(--red);
+  border-radius: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s;
+}
+.cursor-ring {
+  width: 36px; height: 36px;
+  border: 1px solid rgba(242,242,242,0.4);
+  border-radius: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s, border-color 0.3s;
+}
+body.hovering .cursor-dot { width: 10px; height: 10px; background: var(--white); }
+body.hovering .cursor-ring { width: 56px; height: 56px; border-color: var(--red); }
+
+/* Noise */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 998;
+}
+
+/* NAV */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 1.75rem 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.4s, border-color 0.4s;
+  border-bottom: 1px solid transparent;
+}
+nav.scrolled {
+  background: rgba(13,13,13,0.92);
+  backdrop-filter: blur(16px);
+  border-color: var(--border);
+}
+.nav-logo {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  line-height: 1;
+}
+.nav-logo-main {
+  font-family: 'Krub', sans-serif;
+  font-weight: 400;
+  font-size: 1.4rem;
+  letter-spacing: 0.35em;
+  color: var(--white);
+}
+.nav-logo-sub {
+  font-size: 0.55rem;
+  letter-spacing: 0.5em;
+  color: var(--red);
+  text-transform: uppercase;
+  text-align: center;
+  border-top: 1px solid var(--red);
+  padding-top: 3px;
+  margin-top: 3px;
+}
+.nav-links {
+  display: flex;
+  gap: 2.5rem;
+  list-style: none;
+  align-items: center;
+}
+.nav-links a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--white); }
+.nav-cta {
+  background: var(--red) !important;
+  color: var(--white) !important;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.7rem !important;
+  letter-spacing: 0.15em !important;
+  transition: background 0.2s !important;
+}
+.nav-cta:hover { background: var(--red-dim) !important; }
+
+/* ─── HERO ─── */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+  padding: 8rem 3rem 4rem;
+}
+
+/* Corner brackets */
+.bracket {
+  position: absolute;
+  width: 28px; height: 28px;
+  border-color: var(--red);
+  border-style: solid;
+  opacity: 0.7;
+}
+.bracket-tl { top: 2rem; left: 2rem; border-width: 2px 0 0 2px; }
+.bracket-tr { top: 2rem; right: 2rem; border-width: 2px 2px 0 0; }
+.bracket-bl { bottom: 2rem; left: 2rem; border-width: 0 0 2px 2px; }
+.bracket-br { bottom: 2rem; right: 2rem; border-width: 0 2px 2px 0; }
+
+/* Red diagonal slash background */
+.hero-slash {
+  position: absolute;
+  bottom: -10%;
+  left: -5%;
+  width: 45%;
+  height: 130%;
+  background: var(--red);
+  transform: skewX(-12deg);
+  opacity: 0.07;
+  pointer-events: none;
+}
+
+.hero-content {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+}
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 2.5rem;
+}
+.hero-eyebrow::before,
+.hero-eyebrow::after {
+  content: '';
+  display: block;
+  width: 30px;
+  height: 1px;
+  background: var(--red);
+}
+/* Big VANDAL wordmark — using CSS to fake the bold display font */
+.hero-wordmark {
+  display: block;
+  font-family: 'Krub', sans-serif;
+  font-weight: 400;
+  font-size: clamp(72px, 14vw, 180px);
+  letter-spacing: 0.12em;
+  line-height: 0.95;
+  color: var(--white);
+  margin-bottom: 0;
+  -webkit-text-stroke: 0px;
+}
+.hero-studio {
+  display: block;
+  font-size: clamp(11px, 1.5vw, 16px);
+  letter-spacing: 0.65em;
+  color: var(--red);
+  text-transform: uppercase;
+  font-weight: 200;
+  border-top: 1px solid var(--red);
+  border-bottom: 1px solid var(--red);
+  padding: 0.4rem 0;
+  margin: 0.5rem auto 3rem;
+  max-width: 340px;
+}
+.hero-manifesto {
+  font-size: clamp(0.65rem, 1.2vw, 0.8rem);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 2;
+  margin-bottom: 3.5rem;
+}
+.hero-cta-group {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+}
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--red);
+  color: var(--white);
+  padding: 1rem 2.5rem;
+  text-decoration: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: background 0.2s, gap 0.2s;
+}
+.btn-primary:hover { background: var(--red-dim); gap: 1.25rem; }
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 1rem 2.5rem;
+  text-decoration: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-ghost:hover { border-color: var(--white); color: var(--white); }
+
+/* REC indicator */
+.rec-dot {
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: var(--red);
+  z-index: 10;
+}
+.rec-dot::before {
+  content: '';
+  width: 7px; height: 7px;
+  background: var(--red);
+  border-radius: 50%;
+  animation: blink 1.5s ease-in-out infinite;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* Scroll indicator */
+.scroll-hint {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--muted);
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  z-index: 10;
+}
+.scroll-line-anim {
+  width: 1px;
+  height: 50px;
+  background: linear-gradient(to bottom, var(--muted), transparent);
+  animation: scrollDown 2s ease-in-out infinite;
+}
+@keyframes scrollDown {
+  0% { transform: scaleY(0); transform-origin: top; opacity: 1; }
+  50% { transform: scaleY(1); transform-origin: top; }
+  51% { transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+}
+
+/* ─── MARQUEE ─── */
+.ticker {
+  overflow: hidden;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--charcoal);
+  padding: 0.85rem 0;
+}
+.ticker-track {
+  display: flex;
+  gap: 3rem;
+  width: max-content;
+  animation: ticker 24s linear infinite;
+}
+.ticker-item {
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+.ticker-sep {
+  color: var(--red);
+  font-size: 1rem;
+  line-height: 1;
+}
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ─── SECTIONS ─── */
+section { padding: 8rem 3rem; }
+.section-tag {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 3rem;
+}
+.section-tag::after {
+  content: '';
+  flex: 1;
+  max-width: 60px;
+  height: 1px;
+  background: var(--red);
+}
+h2.display {
+  font-family: 'Krub', sans-serif;
+  font-weight: 400;
+  font-size: clamp(36px, 5.5vw, 72px);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* ─── SERVICES ─── */
+#servicios { background: var(--bg); }
+.services-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: end;
+  margin-bottom: 5rem;
+}
+.services-intro {
+  font-size: 0.88rem;
+  line-height: 1.9;
+  color: var(--muted);
+  max-width: 380px;
+}
+.services-list {
+  display: grid;
+  gap: 1px;
+  background: var(--border);
+}
+.service-row {
+  background: var(--bg);
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem 2.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s;
+  text-decoration: none;
+  color: var(--white);
+}
+.service-row::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--red);
+  transform: scaleY(0);
+  transition: transform 0.3s;
+}
+.service-row:hover { background: rgba(226,10,10,0.04); }
+.service-row:hover::before { transform: scaleY(1); }
+.service-row:hover .service-arrow { opacity: 1; transform: translateX(0); color: var(--red); }
+.srv-num {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--red);
+  font-weight: 300;
+}
+.srv-name {
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+.srv-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.srv-tag {
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 0.25rem 0.6rem;
+  text-transform: uppercase;
+}
+.service-arrow {
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.3s, transform 0.3s;
+  font-size: 1.2rem;
+  margin-left: 1rem;
+}
+
+/* ─── PORTFOLIO ─── */
+#portafolio { background: var(--charcoal); padding: 8rem 0; }
+#portafolio .section-tag { padding: 0 3rem; }
+#portafolio h2.display { padding: 0 3rem; margin-bottom: 3rem; }
+.portfolio-filter {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 3rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+.filter-btn {
+  font-family: 'Krub', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.5rem 1.25rem;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--muted);
+  cursor: none;
+  transition: all 0.2s;
+}
+.filter-btn.active, .filter-btn:hover {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--white);
+}
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: 380px 280px;
+  gap: 2px;
+}
+.p-item {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+}
+.p-item:nth-child(1) { grid-column: span 5; grid-row: span 2; }
+.p-item:nth-child(2) { grid-column: span 4; }
+.p-item:nth-child(3) { grid-column: span 3; }
+.p-item:nth-child(4) { grid-column: span 3; }
+.p-item:nth-child(5) { grid-column: span 4; }
+
+.p-bg {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.p-item:hover .p-bg { transform: scale(1.04); }
+.p-bg-1 {
+  background: linear-gradient(160deg, #1a0a0a 0%, #0d0d0d 50%, #1a1a0a 100%);
+}
+.p-bg-2 { background: linear-gradient(135deg, #0a0a1a 0%, #0d0d0d 100%); }
+.p-bg-3 { background: linear-gradient(135deg, #0a1a0a 0%, #0d0d0d 100%); }
+.p-bg-4 { background: linear-gradient(135deg, #1a0a0a 0%, #120505 100%); }
+.p-bg-5 { background: linear-gradient(135deg, #0d0d0d 0%, #1a1010 100%); }
+
+/* Halftone effect via SVG filter */
+.p-halftone {
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  background: radial-gradient(circle at 30% 50%, var(--red) 0%, transparent 60%);
+  transition: opacity 0.3s;
+}
+.p-item:hover .p-halftone { opacity: 0.15; }
+
+.p-letter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Krub', sans-serif;
+  font-weight: 400;
+  font-size: clamp(80px, 15vw, 200px);
+  letter-spacing: -0.02em;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(226,10,10,0.12);
+  transition: -webkit-text-stroke-color 0.4s;
+  pointer-events: none;
+}
+.p-item:hover .p-letter { -webkit-text-stroke-color: rgba(226,10,10,0.25); }
+
+.p-info {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 1.5rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+  transform: translateY(4px);
+  transition: transform 0.3s;
+}
+.p-item:hover .p-info { transform: translateY(0); }
+.p-cat {
+  font-size: 0.58rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 0.35rem;
+}
+.p-title {
+  font-size: clamp(1rem, 2vw, 1.4rem);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.p-hover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(226,10,10,0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+.p-item:hover .p-hover-overlay { opacity: 1; }
+.p-hover-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--white);
+  border: 1px solid rgba(242,242,242,0.4);
+  padding: 0.75rem 1.75rem;
+}
+
+/* ─── SOBRE NOSOTROS ─── */
+#nosotros { background: var(--bg); }
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6rem;
+  margin-top: 4rem;
+}
+.about-left { }
+.about-manifesto-line {
+  font-size: clamp(1.2rem, 2.5vw, 2rem);
+  font-weight: 200;
+  line-height: 1.4;
+  color: var(--white);
+  margin-bottom: 3rem;
+}
+.about-manifesto-line em {
+  color: var(--red);
+  font-style: normal;
+}
+.about-body {
+  font-size: 0.88rem;
+  line-height: 2;
+  color: var(--muted);
+}
+.about-body p + p { margin-top: 1.25rem; }
+.about-right {}
+.stats-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  margin-bottom: 1px;
+}
+.stat {
+  background: var(--bg);
+  padding: 2.5rem;
+  position: relative;
+}
+.stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 2px;
+  background: var(--red);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s;
+}
+.stat:hover::before { transform: scaleX(1); }
+.stat-n {
+  font-family: 'Krub', sans-serif;
+  font-weight: 400;
+  font-size: 3rem;
+  letter-spacing: 0.05em;
+  color: var(--white);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+.stat-n span { color: var(--red); }
+.stat-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.about-quote {
+  background: var(--red);
+  padding: 2.5rem;
+  margin-top: 1px;
+}
+.about-quote p {
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  line-height: 1.8;
+  color: var(--white);
+}
+.about-quote p strong { display: block; font-weight: 400; }
+
+/* ─── ICONS ROW ─── */
+.pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-top: 1px solid var(--border);
+}
+.pillar {
+  background: var(--bg);
+  padding: 3rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  align-items: flex-start;
+  transition: background 0.3s;
+}
+.pillar:hover { background: rgba(226,10,10,0.04); }
+.pillar-icon {
+  width: 28px; height: 28px;
+  color: var(--red);
+  flex-shrink: 0;
+}
+.pillar-name {
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--white);
+  font-weight: 400;
+}
+.pillar-desc {
+  font-size: 0.8rem;
+  line-height: 1.8;
+  color: var(--muted);
+}
+
+/* ─── CONTACTO ─── */
+#contacto {
+  background: var(--white);
+  color: var(--charcoal);
+}
+#contacto .section-tag { color: var(--red); }
+#contacto .section-tag::after { background: var(--red); }
+#contacto h2.display { color: var(--charcoal); }
+.contact-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8rem;
+  margin-top: 4rem;
+}
+.contact-left { }
+.contact-big-text {
+  font-size: clamp(0.85rem, 1.3vw, 1.05rem);
+  line-height: 1.9;
+  color: #555;
+  margin-bottom: 3rem;
+}
+.contact-links { display: flex; flex-direction: column; gap: 1px; }
+.contact-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid rgba(26,26,26,0.1);
+  color: var(--charcoal);
+  text-decoration: none;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+.contact-link:hover { color: var(--red); }
+.contact-link-arrow { font-size: 1rem; transition: transform 0.2s; }
+.contact-link:hover .contact-link-arrow { transform: translateX(4px); }
+.contact-right { }
+.contact-form { display: flex; flex-direction: column; }
+.form-row {
+  border-bottom: 1px solid rgba(26,26,26,0.12);
+  padding: 1.25rem 0;
+}
+.form-row label {
+  display: block;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 0.5rem;
+}
+.form-row input,
+.form-row textarea,
+.form-row select {
+  width: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: 'Krub', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 300;
+  color: var(--charcoal);
+  resize: none;
+  -webkit-appearance: none;
+}
+.form-row input::placeholder,
+.form-row textarea::placeholder { color: #bbb; }
+.form-row select option { background: var(--white); color: var(--charcoal); }
+.form-submit {
+  margin-top: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--red);
+  color: var(--white);
+  border: none;
+  padding: 1.1rem 2.5rem;
+  font-family: 'Krub', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: none;
+  align-self: flex-start;
+  transition: background 0.2s, gap 0.2s;
+}
+.form-submit:hover { background: var(--red-dim); gap: 1.5rem; }
+
+/* ─── FOOTER ─── */
+footer {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  padding: 2rem 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+.footer-logo-wrap {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+.footer-logo-text {
+  font-family: 'Krub', sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  letter-spacing: 0.3em;
+  color: var(--white);
+}
+.footer-logo-sub {
+  font-size: 0.45rem;
+  letter-spacing: 0.5em;
+  color: var(--red);
+  border-top: 1px solid var(--red);
+  padding-top: 2px;
+  margin-top: 2px;
+  text-transform: uppercase;
+}
+.footer-info {
+  display: flex;
+  gap: 3rem;
+  align-items: center;
+}
+.footer-info a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  transition: color 0.2s;
+  text-transform: uppercase;
+}
+.footer-info a:hover { color: var(--white); }
+.footer-copy {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  color: rgba(242,242,242,0.2);
+  text-transform: uppercase;
+}
+
+/* ─── ANIMATIONS ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.on { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor">
+  <div class="cursor-ring"></div>
+  <div class="cursor-dot"></div>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#inicio" style="display:block;line-height:0;text-decoration:none;">
+    <svg width="140" height="48" viewBox="0 0 340 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- VANDAL wordmark — bold condensed, faithful to logo -->
+      <text x="170" y="72" font-family="'Krub',sans-serif" font-weight="900" font-size="88" letter-spacing="-1" text-anchor="middle" fill="#F2F2F2" style="font-stretch:condensed">VANDAL</text>
+      <!-- Lines flanking STUDIO -->
+      <line x1="10" y1="90" x2="98" y2="90" stroke="#F2F2F2" stroke-width="1.5"/>
+      <line x1="242" y1="90" x2="330" y2="90" stroke="#F2F2F2" stroke-width="1.5"/>
+      <text x="170" y="104" font-family="'Krub',sans-serif" font-weight="300" font-size="18" letter-spacing="12" text-anchor="middle" fill="#F2F2F2">STUDIO</text>
+    </svg>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#portafolio">Portafolio</a></li>
+    <li><a href="#nosotros">Nosotros</a></li>
+    <li><a href="#contacto" class="nav-cta">Contacto</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="bracket bracket-tl"></div>
+  <div class="bracket bracket-tr"></div>
+  <div class="bracket bracket-bl"></div>
+  <div class="bracket bracket-br"></div>
+  <div class="hero-slash"></div>
+  <div class="rec-dot">REC</div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">Cancun, Mexico — Est. 2024</div>
+    <svg width="520" height="150" viewBox="0 0 680 160" fill="none" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;">
+      <text x="340" y="110" font-family="'Krub',sans-serif" font-weight="900" font-size="140" letter-spacing="-2" text-anchor="middle" fill="#F2F2F2" style="font-stretch:condensed">VANDAL</text>
+      <line x1="20" y1="138" x2="222" y2="138" stroke="#F2F2F2" stroke-width="1.5"/>
+      <line x1="458" y1="138" x2="660" y2="138" stroke="#F2F2F2" stroke-width="1.5"/>
+      <text x="340" y="158" font-family="'Krub',sans-serif" font-weight="300" font-size="22" letter-spacing="18" text-anchor="middle" fill="#F2F2F2">STUDIO</text>
+    </svg>
+    <p class="hero-manifesto">
+      Violence Against Normality<br>
+      Defines Authentic Legacy
+    </p>
+    <div class="hero-cta-group">
+      <a href="#portafolio" class="btn-primary">Ver portafolio →</a>
+      <a href="#servicios" class="btn-ghost">Servicios</a>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line-anim"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track" id="ticker">
+    <div class="ticker-item">Film <span class="ticker-sep">+</span></div>
+    <div class="ticker-item">Photo <span class="ticker-sep">+</span></div>
+    <div class="ticker-item">Edit <span class="ticker-sep">+</span></div>
+    <div class="ticker-item">Sound <span class="ticker-sep">+</span></div>
+    <div class="ticker-item">Color <span class="ticker-sep">+</span></div>
+    <div class="ticker-item">Vision <span class="ticker-sep">+</span></div>
+    <div class="ticker-item">Creativity <span class="ticker-sep">+</span></div>
+    <div class="ticker-item">Execution <span class="ticker-sep">+</span></div>
+    <div class="ticker-item">Film <span class="ticker-sep">+</span></div>
+    <div class="ticker-item">Photo <span class="ticker-sep">+</span></div>
+    <div class="ticker-item">Edit <span class="ticker-sep">+</span></div>
+    <div class="ticker-item">Sound <span class="ticker-sep">+</span></div>
+    <div class="ticker-item">Color <span class="ticker-sep">+</span></div>
+    <div class="ticker-item">Vision <span class="ticker-sep">+</span></div>
+    <div class="ticker-item">Creativity <span class="ticker-sep">+</span></div>
+    <div class="ticker-item">Execution <span class="ticker-sep">+</span></div>
+  </div>
+</div>
+
+<!-- SERVICIOS -->
+<section id="servicios">
+  <div class="services-header">
+    <div>
+      <div class="section-tag reveal">Qué hacemos</div>
+      <h2 class="display reveal reveal-delay-1">Nuestros<br>Servicios</h2>
+    </div>
+    <p class="services-intro reveal reveal-delay-2">No hacemos contenido. Hacemos declaraciones. Cada proyecto que sale de Vandal lleva intención, técnica y una postura clara frente al mundo visual.</p>
+  </div>
+
+  <div class="services-list reveal">
+    <div class="service-row">
+      <span class="srv-num">01</span>
+      <span class="srv-name">Film</span>
+      <div class="srv-tags">
+        <span class="srv-tag">Comerciales</span>
+        <span class="srv-tag">Documentales</span>
+        <span class="srv-tag">Música</span>
+      </div>
+      <span class="service-arrow">→</span>
+    </div>
+    <div class="service-row">
+      <span class="srv-num">02</span>
+      <span class="srv-name">Photo</span>
+      <div class="srv-tags">
+        <span class="srv-tag">Editorial</span>
+        <span class="srv-tag">Producto</span>
+        <span class="srv-tag">Campaña</span>
+      </div>
+      <span class="service-arrow">→</span>
+    </div>
+    <div class="service-row">
+      <span class="srv-num">03</span>
+      <span class="srv-name">Edit</span>
+      <div class="srv-tags">
+        <span class="srv-tag">Post-producción</span>
+        <span class="srv-tag">Motion</span>
+        <span class="srv-tag">VFX</span>
+      </div>
+      <span class="service-arrow">→</span>
+    </div>
+    <div class="service-row">
+      <span class="srv-num">04</span>
+      <span class="srv-name">Sound</span>
+      <div class="srv-tags">
+        <span class="srv-tag">Diseño sonoro</span>
+        <span class="srv-tag">Score</span>
+        <span class="srv-tag">Mezcla</span>
+      </div>
+      <span class="service-arrow">→</span>
+    </div>
+    <div class="service-row">
+      <span class="srv-num">05</span>
+      <span class="srv-name">Color</span>
+      <div class="srv-tags">
+        <span class="srv-tag">Gradación</span>
+        <span class="srv-tag">Corrección</span>
+        <span class="srv-tag">LUT</span>
+      </div>
+      <span class="service-arrow">→</span>
+    </div>
+  </div>
+</section>
+
+<!-- PORTFOLIO -->
+<section id="portafolio">
+  <div class="section-tag reveal">Trabajo selecto</div>
+  <h2 class="display reveal reveal-delay-1">Portafolio</h2>
+
+  <div class="portfolio-filter reveal reveal-delay-2">
+    <button class="filter-btn active">Todo</button>
+    <button class="filter-btn">Film</button>
+    <button class="filter-btn">Photo</button>
+    <button class="filter-btn">Branding</button>
+  </div>
+
+  <div class="portfolio-grid reveal">
+    <div class="p-item">
+      <div class="p-bg p-bg-1"></div>
+      <div class="p-halftone"></div>
+      <div class="p-letter">V</div>
+      <div class="p-info">
+        <div class="p-cat">Film / Comercial</div>
+        <div class="p-title">Campaña Automotriz</div>
+      </div>
+      <div class="p-hover-overlay"><span class="p-hover-label">Ver proyecto</span></div>
+    </div>
+    <div class="p-item">
+      <div class="p-bg p-bg-2"></div>
+      <div class="p-halftone"></div>
+      <div class="p-letter">A</div>
+      <div class="p-info">
+        <div class="p-cat">Photo / Editorial</div>
+        <div class="p-title">Lookbook 001</div>
+      </div>
+      <div class="p-hover-overlay"><span class="p-hover-label">Ver proyecto</span></div>
+    </div>
+    <div class="p-item">
+      <div class="p-bg p-bg-3"></div>
+      <div class="p-halftone"></div>
+      <div class="p-letter">N</div>
+      <div class="p-info">
+        <div class="p-cat">Sound / Score</div>
+        <div class="p-title">Short Film OST</div>
+      </div>
+      <div class="p-hover-overlay"><span class="p-hover-label">Ver proyecto</span></div>
+    </div>
+    <div class="p-item">
+      <div class="p-bg p-bg-4"></div>
+      <div class="p-halftone"></div>
+      <div class="p-letter">D</div>
+      <div class="p-info">
+        <div class="p-cat">Color / Gradación</div>
+        <div class="p-title">Serie Documental</div>
+      </div>
+      <div class="p-hover-overlay"><span class="p-hover-label">Ver proyecto</span></div>
+    </div>
+    <div class="p-item">
+      <div class="p-bg p-bg-5"></div>
+      <div class="p-halftone"></div>
+      <div class="p-letter">L</div>
+      <div class="p-info">
+        <div class="p-cat">Film / Música</div>
+        <div class="p-title">Video Musical</div>
+      </div>
+      <div class="p-hover-overlay"><span class="p-hover-label">Ver proyecto</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PILLARS -->
+<div class="pillars">
+  <div class="pillar reveal">
+    <svg class="pillar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/>
+    </svg>
+    <div class="pillar-name">Built for Set</div>
+    <p class="pillar-desc">Equipados para cualquier producción, desde comerciales de alto presupuesto hasta proyectos independientes.</p>
+  </div>
+  <div class="pillar reveal reveal-delay-1">
+    <svg class="pillar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </svg>
+    <div class="pillar-name">Made to Move</div>
+    <p class="pillar-desc">Producción ágil, adaptable y sin burocracia. Nos movemos tan rápido como la idea lo exige.</p>
+  </div>
+  <div class="pillar reveal reveal-delay-2">
+    <svg class="pillar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+    </svg>
+    <div class="pillar-name">Created to Leave a Mark</div>
+    <p class="pillar-desc">Cada pieza que producimos existe para perdurar. No hacemos contenido descartable.</p>
+  </div>
+</div>
+
+<!-- NOSOTROS -->
+<section id="nosotros">
+  <div class="section-tag reveal">Quiénes somos</div>
+  <h2 class="display reveal reveal-delay-1">Violence Against<br>Normality.</h2>
+
+  <div class="about-grid">
+    <div class="about-left reveal">
+      <p class="about-manifesto-line">
+        "No hacemos contenido.<br>
+        Hacemos <em>declaraciones.</em>"
+      </p>
+      <div class="about-body">
+        <p>VANDAL nació en Cancún con una convicción: que lo seguro no deja legado. Somos un estudio creativo especializado en producción audiovisual para marcas, artistas y proyectos que entienden que diferenciarse no es una opción — es una necesidad.</p>
+        <p>Nuestro nombre no alude a la destrucción sin sentido, sino a la transformación. A intervenir lo existente para resignificarlo. A dejar huella en cada fotograma, en cada toma, en cada decisión de color.</p>
+        <p>Operamos con la precisión de un estudio de nivel internacional y la audacia de quienes no tienen nada que perder siendo auténticos.</p>
+      </div>
+    </div>
+
+    <div class="about-right">
+      <div class="stats-block">
+        <div class="stat reveal">
+          <div class="stat-n">+50<span>.</span></div>
+          <div class="stat-label">Proyectos completados</div>
+        </div>
+        <div class="stat reveal reveal-delay-1">
+          <div class="stat-n">2<span>k</span></div>
+          <div class="stat-label">Horas de producción</div>
+        </div>
+        <div class="stat reveal reveal-delay-2">
+          <div class="stat-n">24<span>/7</span></div>
+          <div class="stat-label">Disponibilidad</div>
+        </div>
+        <div class="stat reveal reveal-delay-3">
+          <div class="stat-n">1<span>.</span></div>
+          <div class="stat-label">Estudio, worldwide</div>
+        </div>
+      </div>
+      <div class="about-quote reveal">
+        <p>
+          <strong>Est. 2024 — Cancún, Mexico</strong>
+          Film · Photo · Edit · Sound · Color
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACTO -->
+<section id="contacto">
+  <div class="section-tag">Hablemos</div>
+  <h2 class="display">¿Tienes un<br>proyecto?</h2>
+
+  <div class="contact-layout">
+    <div class="contact-left">
+      <p class="contact-big-text">Cuéntanos qué tienes en mente. No importa si es una idea vaga o un brief completo — nosotros tomamos desde ahí y lo llevamos a algo que te enorgullezca mostrar.</p>
+      <div class="contact-links">
+        <a href="mailto:hola@vandalstudio.mx" class="contact-link">
+          hola@vandalstudio.mx
+          <span class="contact-link-arrow">→</span>
+        </a>
+        <a href="https://instagram.com/vandalstudio" class="contact-link">
+          @vandalstudio
+          <span class="contact-link-arrow">→</span>
+        </a>
+        <a href="#" class="contact-link">
+          Cancún, Mexico · Worldwide
+          <span class="contact-link-arrow">→</span>
+        </a>
+      </div>
+    </div>
+
+    <form class="contact-form" onsubmit="return false;">
+      <div class="form-row">
+        <label>Nombre</label>
+        <input type="text" placeholder="Tu nombre completo">
+      </div>
+      <div class="form-row">
+        <label>Correo</label>
+        <input type="email" placeholder="tu@correo.com">
+      </div>
+      <div class="form-row">
+        <label>Tipo de proyecto</label>
+        <select>
+          <option value="" disabled selected>Selecciona un servicio</option>
+          <option>Film</option>
+          <option>Photo</option>
+          <option>Edit</option>
+          <option>Sound</option>
+          <option>Color</option>
+          <option>Proyecto completo</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Mensaje</label>
+        <textarea rows="4" placeholder="Cuéntanos sobre tu proyecto..."></textarea>
+      </div>
+      <button class="form-submit">Enviar mensaje →</button>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <svg width="110" height="38" viewBox="0 0 340 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <text x="170" y="72" font-family="'Krub',sans-serif" font-weight="900" font-size="88" letter-spacing="-1" text-anchor="middle" fill="#F2F2F2" style="font-stretch:condensed">VANDAL</text>
+      <line x1="10" y1="90" x2="98" y2="90" stroke="#F2F2F2" stroke-width="1.5"/>
+      <line x1="242" y1="90" x2="330" y2="90" stroke="#F2F2F2" stroke-width="1.5"/>
+      <text x="170" y="104" font-family="'Krub',sans-serif" font-weight="300" font-size="18" letter-spacing="12" text-anchor="middle" fill="#F2F2F2">STUDIO</text>
+    </svg>
+  <div class="footer-info">
+    <a href="mailto:hola@vandalstudio.mx">hola@vandalstudio.mx</a>
+    <a href="https://instagram.com/vandalstudio">Instagram</a>
+    <a href="#">Cancún, MX</a>
+  </div>
+  <span class="footer-copy">© 2024 Vandal Studio · All rights reserved</span>
+</footer>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  let mx = 0, my = 0, cx = 0, cy = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  (function loop() {
+    cx += (mx - cx) * 0.15;
+    cy += (my - cy) * 0.15;
+    cursor.style.left = cx + 'px';
+    cursor.style.top = cy + 'px';
+    requestAnimationFrame(loop);
+  })();
+  document.querySelectorAll('a, button, .service-row, .p-item, .pillar, .stat').forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+  });
+
+  // Nav scroll
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 60));
+
+  // Reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('on'); });
+  }, { threshold: 0.12 });
+  reveals.forEach(el => obs.observe(el));
+
+  // Filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
